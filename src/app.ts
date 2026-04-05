@@ -2,6 +2,7 @@ import cors from "cors";
 import express from "express";
 import helmet from "helmet";
 import morgan from "morgan";
+import swaggerUiDist from "swagger-ui-dist";
 import { env } from "./config/env.js";
 import { openApiSpec } from "./docs/openapi.js";
 import { healthRouter } from "./routes/health.js";
@@ -14,20 +15,14 @@ const app = express();
 
 app.use(
   helmet({
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", "'unsafe-inline'", "https://unpkg.com"],
-        styleSrc: ["'self'", "'unsafe-inline'", "https://unpkg.com"],
-        imgSrc: ["'self'", "data:", "https:"],
-        connectSrc: ["'self'"],
-      },
-    },
+    contentSecurityPolicy: false,
   }),
 );
 app.use(cors({ origin: env.corsOrigin }));
 app.use(express.json({ limit: "1mb" }));
 app.use(morgan("dev"));
+
+app.use("/api/docs-assets", express.static(swaggerUiDist.getAbsoluteFSPath()));
 
 app.get("/api/openapi.json", (_req, res) => {
   res.json(openApiSpec);
@@ -39,7 +34,7 @@ const swaggerHtml = `<!doctype html>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Finance System Backend API Docs</title>
-    <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css" />
+    <link rel="stylesheet" href="/api/docs-assets/swagger-ui.css" />
     <style>
       html, body { margin: 0; padding: 0; background: #f8fafc; }
       #swagger-ui { min-height: 100vh; }
@@ -48,8 +43,8 @@ const swaggerHtml = `<!doctype html>
   </head>
   <body>
     <div id="swagger-ui"></div>
-    <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js" crossorigin></script>
-    <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-standalone-preset.js" crossorigin></script>
+    <script src="/api/docs-assets/swagger-ui-bundle.js"></script>
+    <script src="/api/docs-assets/swagger-ui-standalone-preset.js"></script>
     <script>
       window.onload = () => {
         window.ui = SwaggerUIBundle({
