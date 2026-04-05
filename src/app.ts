@@ -12,7 +12,19 @@ import { adminRouter } from "./routes/admin.js";
 
 const app = express();
 
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'", "https://unpkg.com"],
+        styleSrc: ["'self'", "'unsafe-inline'", "https://unpkg.com"],
+        imgSrc: ["'self'", "data:", "https:"],
+        connectSrc: ["'self'"],
+      },
+    },
+  }),
+);
 app.use(cors({ origin: env.corsOrigin }));
 app.use(express.json({ limit: "1mb" }));
 app.use(morgan("dev"));
